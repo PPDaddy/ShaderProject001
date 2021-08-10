@@ -117,39 +117,27 @@ public class TrailScript : MonoBehaviour
             vertices.Add( v[0] );
             vertices.Add( v[1] );
             vertices.Add( v[2] );
-
             vertices.Add( v[3] );
-            vertices.Add( v[2] );
-            vertices.Add( v[1] );
 
-            uvs.Add(new Vector2(1, uvHeightBottom)); //B
-            uvs.Add(new Vector2(0, uvHeightBottom)); //B
-            uvs.Add(new Vector2(1, uvHeightTop)); //T
+            triangles.Add( i * 4 + 0 );
+            triangles.Add( i * 4 + 1 );
+            triangles.Add( i * 4 + 2 );
 
-            uvs.Add(new Vector2(0, uvHeightTop)); //T
-            uvs.Add(new Vector2(1, uvHeightTop)); //T
-            uvs.Add(new Vector2(0, uvHeightBottom)); //B
+            triangles.Add( i * 4 + 3 );
+            triangles.Add( i * 4 + 2 );
+            triangles.Add( i * 4 + 1 );
 
-            //uvs.Add(new Vector2(1, 0));
-            //uvs.Add(new Vector2(0, 0));
-            //uvs.Add(new Vector2(1, 1));
-
-            //uvs.Add(new Vector2(0, 1));
-            //uvs.Add(new Vector2(1, 1));
-            //uvs.Add(new Vector2(0, 0));
+            uvs.Add(new Vector2(1, uvHeightBottom)); //1,0
+            uvs.Add(new Vector2(0, uvHeightBottom)); //0,0
+            uvs.Add(new Vector2(1, uvHeightTop));    //1,1
+            uvs.Add(new Vector2(0, uvHeightTop));    //0,1
+            
         }
 
-        for (int i = 0; i < vertices.Count; i++)
-        {
-            triangles.Add(i);
-        }
-        //Last Vertex Position Follow Gizmos
         if (vertices.Count > 4)
         {
+            vertices[vertices.Count-1] = trailGizmos.position - trailGizmos.right * trailWidth;
             vertices[vertices.Count-2] = trailGizmos.position + trailGizmos.right * trailWidth;
-            vertices[vertices.Count-4] = trailGizmos.position + trailGizmos.right * trailWidth;
-
-            vertices[vertices.Count-3] = trailGizmos.position - trailGizmos.right * trailWidth;
         }
     }
 

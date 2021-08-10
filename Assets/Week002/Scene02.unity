@@ -591,10 +591,7 @@ MonoBehaviour:
   trailGizmos: {fileID: 906506800}
   posList: []
   material: {fileID: 2100000, guid: 7304facbdd941bb4a9137b38c4c14686, type: 2}
-  vertices: []
-  triangles: 
-  uvs: []
-  stepMax: 50
+  stepMax: 25
   timeMax: 0.1
   trailWidth: 1.5
   spacing: 0.5
