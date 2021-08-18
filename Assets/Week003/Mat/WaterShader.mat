@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 6
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: WaterShader
+  m_Shader: {fileID: 4800000, guid: e34a63840710c6944bbefd6f4d50e7bc, type: 3}
+  m_ShaderKeywords: 
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - uFlowTex:
+        m_Texture: {fileID: 2800000, guid: e67fbc24ceab9e6419f0752bcbf7aebc, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - uMaskTex:
+        m_Texture: {fileID: 2800000, guid: a85081eb93ae41645842f2ed382a62c4, type: 3}
+        m_Scale: {x: 20, y: 20}
+        m_Offset: {x: 0, y: 0}
+    - uNormalTex:
+        m_Texture: {fileID: 2800000, guid: 003c674839d3def41820224888327b8c, type: 3}
+        m_Scale: {x: 2, y: 2}
+        m_Offset: {x: 0, y: 0}
+    - uWaterTex:
+        m_Texture: {fileID: 2800000, guid: 003c674839d3def41820224888327b8c, type: 3}
+        m_Scale: {x: 2, y: 2}
+        m_Offset: {x: 0, y: 0}
+    m_Floats:
+    - uDepthMax: 3
+    - uWaterDepth: 0.997
+    m_Colors:
+    - uWaterColor: {r: 0, g: 0.989455, b: 1, a: 1}
+    - uWaterColorDepth: {r: 0.16862747, g: 0.36820957, b: 0.49019608, a: 1}
+    - uWaterDepthColor: {r: 0.13333334, g: 0.27537268, b: 0.5176471, a: 1}
+  m_BuildTextureStacks: []

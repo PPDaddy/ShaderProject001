@@ -80,11 +80,12 @@ public class CatmullRom : MonoBehaviour
             
             if (i == 0) postPos = pos;
 
-            Vector3 dir = (pos - postPos).normalized;
-            Vector3 right = Vector3.Cross(Vector3.up, dir);
+            //Vector3 dir = (pos - postPos).normalized;
+            //Vector3 right = Vector3.Cross(Vector3.up, dir);
+            Quaternion q = Quaternion.LookRotation( postPos, Vector3.up);
 
             Gizmos.color = Color.blue;
-            Gizmos.DrawLine(pos, pos + dir);
+            Gizmos.DrawLine(pos, pos + q * Vector3.right);
 
             Gizmos.color = Color.white;
             Gizmos.DrawLine(pos, postPos);
