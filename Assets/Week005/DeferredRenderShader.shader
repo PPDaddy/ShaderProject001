@@ -85,7 +85,7 @@ Shader "Custom/DeferredRenderShader"
                 float depth  = SampleSceneDepth(IN.uv);
                 float2 UV = IN.positionCS.xy / _ScaledScreenParams.xy;
 
-	            float3 viewPos = mul((float2(IN.uv.x, 1 - IN.uv.y) * 2.0 - 1.0), UNITY_MATRIX_P) * (1.0 / (_ZBufferParams.z * depth + _ZBufferParams.w));
+	            float3 viewPos = mul((float2(IN.uv.x, 1 - IN.uv.y) * 2.0 - 1.0), UNITY_MATRIX_I_P) * (1.0 / (_ZBufferParams.z * depth + _ZBufferParams.w));
                 //
                 float2 texel = float2(1.0/_ScreenParams.x, 1.0/_ScreenParams.y);
                 
