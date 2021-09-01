@@ -15,7 +15,6 @@ Shader "Custom/DeferredRenderShader"
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
-            //#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
 
             #pragma vertex vert
 			#pragma fragment frag
@@ -84,8 +83,11 @@ Shader "Custom/DeferredRenderShader"
             {
                 float depth  = SampleSceneDepth(IN.uv);
                 float2 UV = IN.positionCS.xy / _ScaledScreenParams.xy;
-
-	            float3 viewPos = mul((float2(IN.uv.x, 1 - IN.uv.y) * 2.0 - 1.0), UNITY_MATRIX_I_P) * (1.0 / (_ZBufferParams.z * depth + _ZBufferParams.w));
+                //
+                float sceneEyeDepth = LinearEyeDepth(depth, _ZBufferParams);
+                float4x4 P = unity_CameraProjection;
+                float2 p11_22  = float2(P._11, P._22);
+                float3 viewPos = float3((IN.uv * 2.0 - 1.0) / p11_22, -1) * sceneEyeDepth;
                 //
                 float2 texel = float2(1.0/_ScreenParams.x, 1.0/_ScreenParams.y);
                 
@@ -140,7 +142,7 @@ Shader "Custom/DeferredRenderShader"
                 float distance    = length(lightViewPos - viewPos);
                 float attenuation = 1.0 / (distance * distance) ; 
             
-                return float4( color * diffuse * attenuation  , 1.0);
+                return float4( color * diffuse * attenuation , 1.0);
                 //return float4( viewPos , 1.0 );
             }
             ENDHLSL
