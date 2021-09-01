@@ -77,7 +77,6 @@ Shader "Custom/DeferredRenderShader"
                 float3 normal;
                 normal.xy = fenc * g;
                 normal.z = 1.0 - f/2.0;
-
                 return normal;
             }
 
@@ -85,11 +84,8 @@ Shader "Custom/DeferredRenderShader"
             {
                 float depth  = SampleSceneDepth(IN.uv);
                 float2 UV = IN.positionCS.xy / _ScaledScreenParams.xy;
-                //float3 worldPos = ComputeWorldSpacePosition(UV, depth, UNITY_MATRIX_I_P);
-                //
-                float near = _ProjectionParams.y;
-                float far  = _ProjectionParams.z;
-	            float3 viewPos = mul((float2(IN.uv.x, 1 - IN.uv.y) * 2.0 - 1.0), UNITY_MATRIX_P) * (near + (far - near) * depth);
+
+	            float3 viewPos = mul((float2(IN.uv.x, 1 - IN.uv.y) * 2.0 - 1.0), UNITY_MATRIX_P) * (1.0 / (_ZBufferParams.z * depth + _ZBufferParams.w));
                 //
                 float2 texel = float2(1.0/_ScreenParams.x, 1.0/_ScreenParams.y);
                 
@@ -134,12 +130,18 @@ Shader "Custom/DeferredRenderShader"
                 //LIGHTING
                 float3 lightColor = float3(1,1,1);
                 float3 norm = normalVS;
-                float3 lightViewPos = uPointLightPos;
+
+                float3 lightViewPos = uPointLightPos.xyz;
                 float3 lightDir = normalize(lightViewPos - viewPos);  
                 float diff = max(dot(norm, lightDir), 0.0);
                 float3 diffuse = diff * lightColor;
+
+                //POINT
+                float distance    = length(lightViewPos - viewPos);
+                float attenuation = 1.0 / (distance * distance) ; 
             
-                return float4( color * diffuse.xyz , 1.0);
+                return float4( color * diffuse * attenuation  , 1.0);
+                //return float4( viewPos , 1.0 );
             }
             ENDHLSL
         }
