@@ -41,7 +41,7 @@ Shader "Example/MicroGBufferShader"
             {
                 Varyings OUT;
                 OUT.positionHCS = TransformObjectToHClip(IN.positionOS.xyz);
-                OUT.normalVS = normalize(mul((float3x3)UNITY_MATRIX_M, IN.normal));
+                OUT.normalVS = normalize(mul((float3x3)UNITY_MATRIX_MV, IN.normal));
                 OUT.uv = IN.uv;
                 return OUT;
             }
@@ -61,23 +61,41 @@ Shader "Example/MicroGBufferShader"
                 return float3(encodedCol.x, encodedCol.y * MIDPOINT_8_BIT + MIDPOINT_8_BIT, encodedCol.z * MIDPOINT_8_BIT + MIDPOINT_8_BIT);
             }
 
-            float2 octWrap( float2 v )
+            float3 decodeColorYCC( float3 encodedCol )
             {
-                return ( 1.0 - abs( v.yx ) ) * ( v.xy >= 0.0 ? 1.0 : -1.0 );
+                encodedCol = float3(encodedCol.x, encodedCol.y / MIDPOINT_8_BIT - 1., encodedCol.z / MIDPOINT_8_BIT - 1.);
+
+                float3 col;
+                col.r = encodedCol.x + 1.402 * encodedCol.z;
+                col.g = dot( float3( 1, -0.3441, -0.7141 ), encodedCol.xyz );
+                col.b = encodedCol.x + 1.772 * encodedCol.y;
+
+                return col * col;
             }
 
-            float2 encodeNormal( float3 n )
+            float2 encodeNormal(float3 n)
             {
-                n /= ( abs( n.x ) + abs( n.y ) + abs( n.z ) );
-                n.xy = n.z >= 0.0 ? n.xy : octWrap( n.xy );
-                n.xy = n.xy * 0.5 + 0.5;
-                return n.xy;
+                return n.xy * rsqrt(8 * n.z + 8) + 0.5;
+                //float2 enc = normalize(n.xy) * (sqrt(-n.z * 0.5 + 0.5));
+                //enc = enc * 0.5 + 0.5;
+                //return enc;
             }
 
+            float3 decodeNormal(float2 n)
+            {
+                float2 fenc = n * 4.0 - 2.0;
+                float f = dot(fenc,fenc);
+                float g = sqrt(1.0 - f/4.0);
+                float3 normal;
+                normal.xy = fenc * g;
+                normal.z = 1.0 - f/2.0;
+                return normal;
+            }
+        
             float4 frag(Varyings IN) : SV_Target
             {
                 //MASK
-                float checkerBoardMask = 1 - fmod(floor( IN.positionHCS.x + IN.positionHCS.y ), 2.0);
+                float checkerBoardMask = fmod(floor( IN.positionHCS.x ) + floor( IN.positionHCS.y ), 2.0);
 
                 //COLOR
                 float4 mainTex = tex2D(uMainTex, IN.uv * uMainTex_ST.xy + uMainTex_ST.zw);
@@ -91,8 +109,8 @@ Shader "Example/MicroGBufferShader"
                 float roughness = 0.0; //TBD
                 float metallic = 0.0;  //TBD
                 float2 nrmEncode;
-                nrmEncode.x = checkerBoardMask ? roughness : normalEncode.x;
-	            nrmEncode.y = checkerBoardMask ? metallic  : normalEncode.y;
+                nrmEncode.x = lerp( roughness, normalEncode.x, checkerBoardMask);
+	            nrmEncode.y = lerp( metallic,  normalEncode.y, checkerBoardMask);
 
                 //OUTPUT
                 float4 color = float4(colorEncode, nrmEncode);

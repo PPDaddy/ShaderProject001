@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: DeferredRenderMat
-  m_Shader: {fileID: 4800000, guid: 29f3a7dfa8f84da49b6f63cea4b897f1, type: 3}
+  m_Shader: {fileID: 4800000, guid: 2fefb012fd11e8d4fa3e78fd70d7c6f7, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0

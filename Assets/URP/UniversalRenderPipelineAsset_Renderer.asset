@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c532e774d049f8a43800a4212332618b, type: 3}
   m_Name: NewDeferrdRender
   m_EditorClassIdentifier: 
-  m_Active: 1
+  m_Active: 0
   settings:
     Event: 300
     blitMaterial: {fileID: 2100000, guid: 6265a9adc45997945a9a6fa74d0685ce, type: 2}

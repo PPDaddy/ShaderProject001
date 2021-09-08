@@ -68,22 +68,26 @@ Shader "Custom/DeferredRenderShader"
                 return col * col;
             }
 
-            float3 decodeNormal( float2 f )
+            float3 decodeNormal(float2 n)
             {
-                f = f * 2.0 - 1.0;
-                // https://twitter.com/Stubbesaurus/status/937994790553227264
-                float3 n = float3( f.x, f.y, 1.0 - abs( f.x ) - abs( f.y ) );
-                float t = saturate( -n.z );
-                n.xy += n.xy >= 0.0 ? -t : t;
-                return normalize( n );
+                float2 fenc = n * 4.0 - 2.0;
+                float f = dot(fenc,fenc);
+                float g = sqrt(1.0 - f/4.0);
+                float3 normal;
+                normal.xy = fenc * g;
+                normal.z = 1.0 - f/2.0;
+                return normal;
             }
 
             float4 frag(Varyings IN):SV_Target
             {
                 float depth  = SampleSceneDepth(IN.uv);
                 float2 UV = IN.positionCS.xy / _ScaledScreenParams.xy;
-
-                float3 worldPos = ComputeWorldSpacePosition(IN.uv, depth, UNITY_MATRIX_I_VP);
+                //
+                float sceneEyeDepth = LinearEyeDepth(depth, _ZBufferParams);
+                float4x4 P = unity_CameraProjection;
+                float2 p11_22  = float2(P._11, P._22);
+                float3 viewPos = float3((IN.uv * 2.0 - 1.0) / p11_22, -1) * sceneEyeDepth;
                 //
                 float2 texel = float2(1.0/_ScreenParams.x, 1.0/_ScreenParams.y);
                 
@@ -98,8 +102,11 @@ Shader "Custom/DeferredRenderShader"
                 float4 weights = 1.0 - step(edgeThreshold, abs(lum - uGBuf.x));
                 float weightSum = dot(weights, 1.0);
 
-                weights.x = (weightSum == 0) ? 1 : weights.x;
-                float invWeightSum = (weightSum == 0) ? 1 : rcp(weightSum);
+                float invWeightSum = 1.0;
+                if (weightSum == 0.0)
+                    weights.x = 1.0;
+                else
+                    invWeightSum = 1.0/weightSum;
 
                 //RECONSTRUCT
                 float yy = dot(weights, float4(uGBuf1.y, uGBuf2.y, uGBuf3.y, uGBuf4.y)) * invWeightSum;
@@ -112,32 +119,31 @@ Shader "Custom/DeferredRenderShader"
                 //COLOR DECODE
                 float3 colorDecode;
                 colorDecode.x = uGBuf.x;
-                colorDecode.y = checkerBoardMask ? uGBuf.y : yy ;
-                colorDecode.z = checkerBoardMask ? yy : uGBuf.y ;
+                colorDecode.y = lerp( uGBuf.y, yy, checkerBoardMask);
+                colorDecode.z = lerp( yy, uGBuf.y, checkerBoardMask);
                 float3 color = decodeColorYCC(colorDecode);
 
                 //NORMAL DECODE
                 float2 normalDecode;
-                normalDecode.x = checkerBoardMask ? zz : uGBuf.z ;
-                normalDecode.y = checkerBoardMask ? ww : uGBuf.w ;
-                float3 normalWS = decodeNormal(normalDecode);
+                normalDecode.x = lerp( zz, uGBuf.z, checkerBoardMask);
+                normalDecode.y = lerp( ww, uGBuf.w, checkerBoardMask);
+                float3 normalVS = decodeNormal(normalDecode);
 
                 //LIGHTING
                 float3 lightColor = float3(1,1,1);
-                float3 norm = normalWS;
+                float3 norm = normalVS;
 
-                float3 lightWorldPos = uPointLightPos.xyz;
-                float3 lightDir = normalize(lightWorldPos - worldPos);  
+                float3 lightViewPos = uPointLightPos.xyz;
+                float3 lightDir = normalize(lightViewPos - viewPos);  
                 float diff = max(dot(norm, lightDir), 0.0);
                 float3 diffuse = diff * lightColor;
 
                 //POINT
-                float distance    = length(lightWorldPos - worldPos);
+                float distance    = length(lightViewPos - viewPos);
                 float attenuation = 1.0 / (distance * distance) ; 
             
                 return float4( color * diffuse * attenuation , 1.0);
-                //return float4( worldPos , 1.0 );
-                //return float4(float3(normalWS), 1.0);
+                //return float4( viewPos , 1.0 );
             }
             ENDHLSL
         }

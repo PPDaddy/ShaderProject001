@@ -24,8 +24,10 @@ public class DeferredRenderScript : MonoBehaviour
     {
         if (deferredRenderMat != null && pointLight !=null)
         {
-            Vector4 lightPos = Camera.main.worldToCameraMatrix * pointLight.transform.position;
-            deferredRenderMat.SetVector("uPointLightPos", lightPos );
+            //Vector4 lightPos = Camera.main.worldToCameraMatrix * pointLight.transform.position;
+            //deferredRenderMat.SetVector("uPointLightPos", lightPos );
+
+            deferredRenderMat.SetVector("uPointLightPos", pointLight.transform.position );
         }
 
     }
